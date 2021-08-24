@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>This is user {{ current_user.name}} records</h1>
+
+{% if all_projects %}
+{% for record in all_projects %}
+
+
+<hr>
+{% if record.project_name %}
+<p>Project: {{record.project_name}}</p>
+
+
+{% endif %}
+
+{% endfor %}
+<hr>
+
+
+
+{% endif %}
+
+<a href="/new_project">Add new project</a>
+
+<a href="/new_task">Add new task</a>
+
+{% endblock %}
