@@ -3,26 +3,21 @@
 
 <h1>This is user {{ current_user.name}} records</h1>
 
-{% if all_projects %}
-{% for record in all_projects %}
-
-
+{% for project in all_projects %}
+     <h2> {{project.project_name}} </h2>
+     {% for task in project.tasks %}
+        <p> {{task.task_name}} /  {{task.date}} </p>
+     <p> <a href="/task_status_update/{{task.id}}" style="color:green"> {{task.status}} </a> </p>
 <hr>
-{% if record.project_name %}
-<p>Project: {{record.project_name}}</p>
 
-
-{% endif %}
-
+     {% endfor %}
 {% endfor %}
-<hr>
 
 
 
-{% endif %}
+
 
 <a href="/new_project">Add new project</a>
-
 <a href="/new_task">Add new task</a>
 
 {% endblock %}

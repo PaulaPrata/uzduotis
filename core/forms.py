@@ -1,9 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField, FloatField, SelectField
+from flask_wtf.file import FileAllowed
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, SelectField, FileField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms_sqlalchemy.fields import QuerySelectField
 from core import app, models
-
+from wtforms.fields.html5 import DateField
 
 
 class RegForm(FlaskForm):
@@ -18,10 +19,11 @@ class RegForm(FlaskForm):
         if customer:
             raise ValidationError('There is already a user with this user name. Please choose another')
 
-    def check_name(self, email):
-        customer = app.Customers.query.filter_by(el_pastas=email.data).first()
+    def check_email(self, email):
+        customer = app.Customers.query.filter_by(email=email.data).first()
         if customer:
             raise ValidationError('There is already a user with this email. Please choose another.')
+
 
 class LoginForm(FlaskForm):
     email = StringField('Email', [DataRequired()])
@@ -29,21 +31,56 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember me')
     submit = SubmitField('Login in')
 
+
 class RecordForm(FlaskForm):
     project_name = StringField('Project Name', [DataRequired()])
     submit = SubmitField('Submit')
 
-# def folder_name_query():
-#     return folder_name.query
-#
-# def project_name_query():
-#     return project_name.query
 
 class TaskForm(FlaskForm):
     task_name = StringField('Task Name', [DataRequired()])
-    project = QuerySelectField("Project Name", query_factory=models.Projects.query.all, allow_blank=True, get_label='project_name', get_pk=lambda obj: str(obj))
-    # folder_name = QuerySelectField("Folder Name", query_factory=, allow_blank=True, get_label='folder_name', get_pk=lambda obj: str(obj)
+    status = SelectField('Completion status', choices=[('Active'), ('Completed')])
+    project = QuerySelectField("Project Name", query_factory=models.Projects.query.all, allow_blank=True,
+                               get_label='project_name', get_pk=lambda obj: str(obj))
+    date = DateField('DatePicker', format='%Y-%m-%d')
     submit = SubmitField('Submit')
 
 
+class TaskStatusUpdateForm(FlaskForm):
+    status = SelectField('Completion status', choices=[('Active'), ('Completed')])
+    submit = SubmitField('Submit')
 
+
+class RequestUpdateForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Submit')
+
+    def validate_email(self, email):
+        user = models.Customers.query.filter_by(email=email.data).first()
+        if user is None:
+            raise ValidationError('There is no user with this account with this email address. Register.')
+
+
+class PasswordResetForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirmed_password = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Submit Password')
+
+
+class AccountUpdateForm(FlaskForm):
+    name = StringField('Name', [DataRequired()])
+    email = StringField('Email', [DataRequired()])
+    photo = FileField('Update profile picture', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    submit = SubmitField('Submit')
+
+    def check_name(self, name):
+        if name.data != app.current_user.name:
+            customer = app.Customers.query.filter_by(name=name.data).first()
+            if customer:
+                raise ValidationError('This name is used already, please choose another one.')
+
+    def check_email(self, email):
+        if email.data != app.current_user.email:
+            customer = app.Vartotojas.query.filter_by(email=email.data).first()
+            if customer:
+                raise ValidationError('This email is used already, please choose another one.')
