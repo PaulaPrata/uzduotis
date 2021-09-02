@@ -31,7 +31,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home</a>
                 </li>
-
+                {% if not current_user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="/register">Register</a>
                 </li>
@@ -39,6 +39,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/login">Login</a>
                 </li>
+                {% endif %}
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="/records">Projects</a>
